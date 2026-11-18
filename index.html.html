@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel da Família</title>
+<style>
+  :root{
+    --bg:#eaf1f4; --card:#ffffff; --ink:#15303d; --muted:#5d7482;
+    --line:#d3e0e6; --accent:#0e6b72; --accent-soft:#d8eef0; --warm:#c9821a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.5 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+  h1{font-size:1.5rem;margin:0 0 4px}
+  h2{font-size:1.05rem;margin:0 0 10px}
+  .sub{color:var(--muted);margin:0 0 16px}
+  .informativo{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:18px;margin:24px 0 0}
+  .informativo h2{color:var(--accent);margin:0 0 10px}
+  .informativo h3{font-size:1rem;margin:20px 0 8px}
+  .informativo p{margin:0 0 12px;color:var(--ink)}
+  .informativo .destaque{background:var(--accent-soft);border-left:4px solid var(--accent);
+    border-radius:6px;padding:12px 14px;margin:14px 0}
+  .grafico-consumo{margin:14px 0 8px}
+  .barra-dado{display:grid;grid-template-columns:minmax(125px,1.2fr) 3fr 42px;
+    align-items:center;gap:10px;margin:12px 0}
+  .barra-dado .trilho{height:14px;background:var(--accent-soft);border-radius:99px;overflow:hidden}
+  .barra-dado .preenchimento{height:100%;background:var(--accent);border-radius:99px}
+  .barra-dado strong{font-size:.9rem;text-align:right;color:var(--accent)}
+  .fonte-info{font-size:.82rem;color:var(--muted);margin-top:12px}
+  .fonte-info a{color:var(--accent);overflow-wrap:anywhere}
+  @media(max-width:520px){.barra-dado{grid-template-columns:1fr 2fr 38px;gap:7px}}
+  padding:16px;margin:0 0 18px}
+  .informativo h2{color:var(--accent);margin:0 0 8px}
+  .informativo p{margin:0;color:var(--muted)}
+  .aviso{background:var(--accent-soft);border-left:4px solid var(--accent);
+    padding:10px 14px;border-radius:6px;font-size:.92rem;margin-bottom:18px}
+  .filhos{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+  button{font:inherit;cursor:pointer}
+  .filho{border:1px solid var(--line);background:var(--card);color:var(--ink);
+    padding:8px 16px;border-radius:999px}
+  .filho[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+  button:focus-visible,input:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+  .resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+  .resumo div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .resumo strong{display:block;font-size:1.5rem;color:var(--accent)}
+  .resumo span{font-size:.85rem;color:var(--muted)}
+  .abas{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:14px}
+  .aba{border:0;background:none;padding:10px 14px;color:var(--muted);
+    border-bottom:3px solid transparent;margin-bottom:-2px}
+  .aba[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+  .painel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+  input[type=search]{width:100%;padding:10px 12px;border:1px solid var(--line);
+    border-radius:8px;font:inherit;margin-bottom:12px}
+  ul{list-style:none;margin:0;padding:0}
+  li{padding:10px 0;border-bottom:1px solid var(--line);display:flex;
+    justify-content:space-between;gap:12px}
+  li:last-child{border-bottom:0}
+  .hora{color:var(--muted);font-size:.85rem;white-space:nowrap}
+  .fonte{display:block;color:var(--muted);font-size:.82rem}
+  .barra{background:var(--accent-soft);border-radius:6px;height:10px;margin-top:6px}
+  .barra i{display:block;height:100%;background:var(--accent);border-radius:6px}
+  .app{display:block;width:100%}
+  .vazio{color:var(--muted);padding:8px 0}
+  [hidden]{display:none!important}
+  input[type=search],input[type=text]{background:var(--card);color:var(--ink)}
+  input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line);
+    border-radius:8px;font:inherit;margin-bottom:12px}
+  .acao{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 18px}
+  .acao.sec{background:none;color:var(--ink);border:1px solid var(--line)}
+  .acao+.acao{margin-left:8px}
+  .vinc{margin-top:16px}
+  .codigo{margin-top:14px;text-align:center;background:var(--accent-soft);border-radius:10px;padding:14px}
+  .codigo span{display:block;color:var(--muted);font-size:.9rem}
+  .codigo strong{display:block;font-size:2rem;letter-spacing:.15em;color:var(--accent);
+    font-family:ui-monospace,Menlo,Consolas,monospace}
+  @media (max-width:520px){.resumo{grid-template-columns:1fr}}
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0f1c22;--card:#172a33;--ink:#e6f0f3;--muted:#92a9b5;
+      --line:#274350;--accent:#4fc1c9;--accent-soft:#1e3d45;--warm:#e9a63f}
+    .filho[aria-pressed="true"],.acao{color:#0f1c22}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Painel da Família</h1>
+  <p class="sub">Veja o que cada criança ou adolescente tem pesquisado e usado.</p>
+
+
+  <div class="filhos" role="group" aria-label="Quem está usando">
+    <button class="filho modo" data-modo="resp" aria-pressed="true">Sou responsável</button>
+    <button class="filho modo" data-modo="filho" aria-pressed="false">Sou filho(a)</button>
+  </div>
+
+  <div id="visaoResp">
+
+  <div class="aviso">
+
+    <span id="avisoNome">O acompanhamento é combinado com a família.</span>
+  </div>
+
+  <div class="filhos" id="filhos" role="group" aria-label="Escolher perfil"></div>
+
+  <section class="resumo" aria-label="Resumo do dia">
+    <div><strong id="rTela">–</strong><span>de tela hoje</span></div>
+    <div><strong id="rPesq">–</strong><span>pesquisas hoje</span></div>
+    <div><strong id="rSites">–</strong><span>sites visitados hoje</span></div>
+  </section>
+
+  <div class="abas" role="tablist">
+    <button class="aba" role="tab" data-aba="pesquisas" aria-selected="true">Pesquisas</button>
+    <button class="aba" role="tab" data-aba="sites" aria-selected="false">Sites</button>
+    <button class="aba" role="tab" data-aba="apps" aria-selected="false">Aplicativos</button>
+  </div>
+
+  <section class="painel" id="painel" role="tabpanel"></section>
+
+  <section class="painel vinc">
+    <h2>Vincular um filho(a)</h2>
+    <p class="sub">Gere um código e digite no aparelho dele(a). O código vale 10 minutos e só funciona uma vez.</p>
+    <input type="text" id="nomeNovo" placeholder="Nome do filho(a)" maxlength="30" aria-label="Nome do filho(a)">
+    <button class="acao" id="gerar">Gerar código</button>
+    <div class="codigo" id="codigoBox" role="status" hidden></div>
+  </section>
+  </div>
+
+  <div id="visaoFilho" hidden>
+    <section class="painel" id="formVinculo">
+      <h2>Vincular este aparelho</h2>
+      <p class="sub">Digite o código que seu responsável gerou.</p>
+      <input type="text" id="codigoIn" placeholder="ABC-123" maxlength="7" autocomplete="off" aria-label="Código de vínculo">
+      <button class="acao" id="verificar">Verificar código</button>
+      <p id="msgFilho" role="status"></p>
+      <div class="aviso" id="consentimento" hidden>
+        <strong>Antes de aceitar</strong>
+        <p>Seu responsável poderá ver o que você pesquisa, os sites que visita e quanto tempo usa cada aplicativo. Ele não poderá bloquear nem alterar nada por aqui. Você pode desfazer o vínculo quando quiser.</p>
+        <button class="acao" id="aceitar">Aceitar e vincular</button>
+        <button class="acao sec" id="recusar">Cancelar</button>
+      </div>
+    </section>
+    <section class="painel" id="statusFilho" hidden>
+      <h2>Aparelho vinculado</h2>
+      <p id="statusTexto"></p>
+      <button class="acao sec" id="desvincular">Desfazer vínculo</button>
+    </section>
+  </div>
+
+  <section class="informativo" aria-labelledby="consumoTitulo">
+    <h2 id="consumoTitulo">Consumo infantil a partir das telas</h2>
+    <p>Celulares, tablets, computadores e televisões fazem parte do cotidiano de crianças e adolescentes. Além de oferecerem entretenimento, informação e oportunidades de aprendizagem, esses meios também são espaços de divulgação de produtos e marcas. Vídeos, jogos, redes sociais e plataformas de streaming podem apresentar anúncios diretamente ou inserir produtos no meio dos conteúdos.</p>
+
+    <h3>Como as telas influenciam o consumo?</h3>
+    <p>A publicidade digital pode influenciar os desejos, as preferências e as decisões de compra. Um brinquedo mostrado por um influenciador, uma roupa usada por um personagem ou um produto apresentado em um vídeo de “unboxing” pode despertar a vontade de possuir aquele item. Como essas divulgações aparecem junto de conteúdos divertidos e cotidianos, nem sempre é fácil perceber que existe uma intenção comercial.</p>
+    <p>Também existem recomendações automáticas de conteúdo, notificações e mecanismos que mantêm as pessoas navegando. Por isso, é importante aprender a reconhecer anúncios, comparar necessidades e desejos, desconfiar de promessas exageradas e conversar com a família antes de realizar compras ou compartilhar dados pessoais. Consumo consciente não significa deixar de usar a tecnologia, mas compreender como ela pode influenciar escolhas.</p>
+
+    <h3>O que os dados mostram?</h3>
+    <p>Na pesquisa <strong>TIC Kids Online Brasil 2025</strong>, entre usuários de Internet de 11 a 17 anos, <strong>55% disseram ter tido contato com publicidade ou propaganda em redes sociais</strong>. A pesquisa também identificou contato com publicidade em sites de vídeos (52%), na televisão (52%) e em sites de jogos (26%).</p>
+    <div class="destaque"><strong>Um dado que chama a atenção:</strong> 84% dos participantes de 11 a 17 anos viram conteúdos com divulgação de produtos ou marcas que não eram necessariamente identificados como propaganda. Isso mostra por que é importante reconhecer também a publicidade que aparece disfarçada de recomendação, demonstração ou entretenimento.</div>
+
+    <div class="grafico-consumo" role="img" aria-label="Gráfico de barras: contato com publicidade entre usuários de Internet de 11 a 17 anos. Redes sociais 55 por cento, sites de vídeos 52 por cento, televisão 52 por cento e sites de jogos 26 por cento.">
+      <h3>Onde os jovens encontram publicidade?</h3>
+      <div class="barra-dado"><span>Redes sociais</span><div class="trilho"><div class="preenchimento" style="width:55%"></div></div><strong>55%</strong></div>
+      <div class="barra-dado"><span>Sites de vídeos</span><div class="trilho"><div class="preenchimento" style="width:52%"></div></div><strong>52%</strong></div>
+      <div class="barra-dado"><span>Televisão</span><div class="trilho"><div class="preenchimento" style="width:52%"></div></div><strong>52%</strong></div>
+      <div class="barra-dado"><span>Sites de jogos</span><div class="trilho"><div class="preenchimento" style="width:26%"></div></div><strong>26%</strong></div>
+      <p class="fonte-info">Percentual de usuários de Internet de 11 a 17 anos que relataram contato com publicidade ou propaganda em cada meio. Os percentuais não representam compras realizadas e as categorias podem se sobrepor.</p>
+    </div>
+
+    <h3>O que é o ECA Digital?</h3>
+    <p>O <strong>Estatuto Digital da Criança e do Adolescente (ECA Digital)</strong>, instituído pela Lei nº 15.211, de 17 de setembro de 2025, está em vigor desde 17 de março de 2026. A lei estabelece medidas para proteger crianças e adolescentes no ambiente digital e atribui responsabilidades às plataformas e aos serviços de tecnologia que são destinados a esse público ou que podem ser acessados por ele.</p>
+    <p>Em relação ao consumo, um ponto importante está no artigo 22: a lei proíbe o uso de técnicas de perfilamento para direcionar publicidade comercial a crianças e adolescentes. Também veda o uso de análise emocional e de tecnologias imersivas, como realidade aumentada, estendida e virtual, para essa finalidade. A intenção é reduzir práticas que utilizam dados e características dos jovens para direcionar anúncios de forma personalizada.</p>
+    <p>O ECA Digital também prevê medidas de proteção de dados e privacidade e ferramentas de supervisão parental. Isso reforça que a segurança digital não depende apenas das famílias: as empresas que oferecem plataformas e serviços também devem adotar medidas de proteção. A legislação não substitui o diálogo em casa, mas estabelece regras para tornar o ambiente digital mais seguro e adequado à idade.</p>
+
+    <h3>O papel da família e da escola</h3>
+    <p>Responsáveis e educadores podem ajudar crianças e adolescentes a desenvolver senso crítico, conversando sobre a diferença entre conteúdo e propaganda, explicando como influenciadores podem receber para divulgar produtos e incentivando perguntas como: “Eu realmente preciso disso?”, “Quem está tentando me convencer?” e “Essa recomendação é uma publicidade?”. Também é importante respeitar a privacidade, combinar limites de uso e manter um diálogo aberto, sem transformar o acompanhamento em vigilância excessiva.</p>
+    <p><strong>Em resumo:</strong> educar para o consumo consciente no ambiente digital é ensinar a usar as telas com informação, equilíbrio e autonomia, reconhecendo interesses comerciais e sabendo que nem tudo o que aparece na Internet é uma recomendação neutra.</p>
+
+    <p class="fonte-info"><strong>Fontes:</strong><br>
+      NIC.br / Cetic.br — <a href="https://cetic.br/pt/pesquisa/kids-online/" target="_blank" rel="noopener noreferrer">Pesquisa TIC Kids Online Brasil</a> (edição 2025).<br>
+      Agência Nacional de Proteção de Dados — <a href="https://www.gov.br/anpd/pt-br/assuntos/eca-digital" target="_blank" rel="noopener noreferrer">ECA Digital</a>.<br>
+      Lei nº 15.211/2025 — <a href="https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/lei/l15211.htm" target="_blank" rel="noopener noreferrer">texto legal</a>.
+    </p>
+  </section>
+</main>
+
+<script>
+
+const DADOS = {
+  "Lia (13)": {
+    tela: "3h 10min",
+    pesquisas: [
+      {t:"receita de bolo de cenoura", f:"Google", h:"Hoje, 15:42"},
+      {t:"como resolver equação do 2º grau", f:"Google", h:"Hoje, 15:10"},
+      {t:"trailer novo filme de animação", f:"YouTube", h:"Hoje, 12:55"},
+      {t:"capital da Austrália", f:"Google", h:"Ontem, 19:20"}
+    ],
+    sites: [
+      {t:"brasilescola.uol.com.br", h:"Hoje, 15:12"},
+      {t:"youtube.com", h:"Hoje, 12:50"},
+      {t:"wikipedia.org", h:"Ontem, 19:22"}
+    ],
+    apps: [
+      {t:"YouTube", m:80}, {t:"WhatsApp", m:55}, {t:"Duolingo", m:30}, {t:"Calculadora", m:10}
+    ]
+  },
+  "Davi (16)": {
+    tela: "4h 25min",
+    pesquisas: [
+      {t:"horário do ônibus linha 240", f:"Google", h:"Hoje, 17:05"},
+      {t:"melhores fones bluetooth até 200 reais", f:"Google", h:"Hoje, 14:30"},
+      {t:"resumo de Dom Casmurro", f:"Google", h:"Ontem, 21:15"}
+    ],
+    sites: [
+      {t:"mercadolivre.com.br", h:"Hoje, 14:33"},
+      {t:"infoescola.com", h:"Ontem, 21:18"}
+    ],
+    apps: [
+      {t:"Instagram", m:95}, {t:"Spotify", m:70}, {t:"YouTube", m:60}, {t:"Notas", m:20}
+    ]
+  }
+};
+
+const $ = s => document.querySelector(s);
+let atual = Object.keys(DADOS)[0];
+let aba = "pesquisas";
+
+function fmt(min){
+  const h = Math.floor(min/60), m = min%60;
+  return h ? `${h}h ${m}min` : `${m}min`;
+}
+
+function esc(txt){
+  const d = document.createElement("div");
+  d.textContent = txt;
+  return d.innerHTML;
+}
+
+function renderFilhos(){
+  $("#filhos").innerHTML = Object.keys(DADOS).map(n =>
+    `<button class="filho" aria-pressed="${n===atual}" data-n="${esc(n)}">${esc(n)}</button>`
+  ).join("");
+  $("#avisoNome").textContent = `${atual.split(" ")[0]} sabe que esta conta é acompanhada.`;
+}
+
+function renderResumo(){
+  const d = DADOS[atual];
+  $("#rTela").textContent = d.tela;
+  $("#rPesq").textContent = d.pesquisas.filter(p => p.h.startsWith("Hoje")).length;
+  $("#rSites").textContent = d.sites.filter(s => s.h.startsWith("Hoje")).length;
+}
+
+function renderPainel(filtro = ""){
+  const d = DADOS[atual];
+  const p = $("#painel");
+
+  if(aba === "pesquisas"){
+    const lista = d.pesquisas.filter(x => x.t.toLowerCase().includes(filtro.toLowerCase()));
+    p.innerHTML = `
+      <h2>O que foi pesquisado</h2>
+      <input type="search" id="busca" placeholder="Filtrar pesquisas" value="${esc(filtro)}" aria-label="Filtrar pesquisas">
+      <ul>${lista.map(x => `
+        <li><div>${esc(x.t)}<span class="fonte">em ${esc(x.f)}</span></div>
+        <span class="hora">${esc(x.h)}</span></li>`).join("") || '<li class="vazio">Nenhuma pesquisa encontrada.</li>'}
+      </ul>`;
+    const b = $("#busca");
+    b.addEventListener("input", e => {
+      const pos = e.target.selectionStart;
+      renderPainel(e.target.value);
+      const nb = $("#busca"); nb.focus(); nb.setSelectionRange(pos,pos);
+    });
+  }
+  else if(aba === "sites"){
+    p.innerHTML = `<h2>Sites visitados</h2><ul>${d.sites.map(x => `
+      <li><div>${esc(x.t)}</div><span class="hora">${esc(x.h)}</span></li>`).join("")}</ul>`;
+  }
+  else{
+    const max = Math.max(1, ...d.apps.map(a => a.m));
+    p.innerHTML = `<h2>Tempo por aplicativo hoje</h2><ul>${d.apps.map(a => `
+      <li><span class="app"><span style="display:flex;justify-content:space-between">
+        <span>${esc(a.t)}</span><span class="hora">${fmt(a.m)}</span></span>
+        <span class="barra" style="display:block"><i style="width:${a.m/max*100}%"></i></span>
+      </span></li>`).join("")}</ul>`;
+  }
+}
+
+$("#filhos").addEventListener("click", e => {
+  const b = e.target.closest(".filho"); if(!b) return;
+  atual = b.dataset.n;
+  renderFilhos(); renderResumo(); renderPainel();
+});
+
+document.querySelectorAll(".aba").forEach(b => b.addEventListener("click", () => {
+  aba = b.dataset.aba;
+  document.querySelectorAll(".aba").forEach(x => x.setAttribute("aria-selected", x === b));
+  renderPainel();
+}));
+
+
+const CK = "pf_codigos", VK = "pf_vinculos", EK = "pf_este";
+const ALFA = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sem 0, O, 1, I
+const ler = (k, pad) => { try { return JSON.parse(localStorage.getItem(k)) || pad; } catch (e) { return pad; } };
+const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const vazio = () => ({ tela: "–", pesquisas: [], sites: [], apps: [] });
+let relogio = null, pendente = null;
+
+ler(VK, []).forEach(v => { if (!DADOS[v.nome]) DADOS[v.nome] = vazio(); });
+
+function novoCodigo(){
+  const b = new Uint32Array(6); crypto.getRandomValues(b);
+  const c = [...b].map(n => ALFA[n % ALFA.length]).join("");
+  return c.slice(0,3) + "-" + c.slice(3);
+}
+function normalizar(txt){
+  const r = txt.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return r.length > 3 ? r.slice(0,3) + "-" + r.slice(3,6) : r;
+}
+function limparExpirados(c){
+  const agora = Date.now();
+  for(const k in c) if(c[k].expira < agora) delete c[k];
+  return c;
+}
+
+
+$("#gerar").addEventListener("click", () => {
+  const nome = $("#nomeNovo").value.trim();
+  const box = $("#codigoBox");
+  box.hidden = false;
+  if(!nome){ box.innerHTML = "<span>Escreva o nome do filho(a) primeiro.</span>"; return; }
+  if(DADOS[nome]){ box.innerHTML = "<span>Já existe um perfil com esse nome.</span>"; return; }
+  const cods = limparExpirados(ler(CK, {}));
+  let c; do { c = novoCodigo(); } while(cods[c]);
+  const expira = Date.now() + 10*60*1000;
+  cods[c] = { nome, expira }; gravar(CK, cods);
+  box.innerHTML = `<span>Digite este código no aparelho de ${esc(nome)}:</span><strong>${c}</strong><span id="restante"></span>`;
+  clearInterval(relogio);
+  const tic = () => {
+    const el = $("#restante"); if(!el){ clearInterval(relogio); return; }
+    const s = Math.max(0, Math.round((expira - Date.now())/1000));
+    el.textContent = s ? `Vale por mais ${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}` : "Código expirado. Gere outro.";
+    if(!s) clearInterval(relogio);
+  };
+  tic(); relogio = setInterval(tic, 1000);
+});
+
+
+const msg = t => { $("#msgFilho").textContent = t; };
+$("#codigoIn").addEventListener("input", e => { e.target.value = normalizar(e.target.value); });
+
+$("#verificar").addEventListener("click", () => {
+  const c = normalizar($("#codigoIn").value);
+  const cods = limparExpirados(ler(CK, {})); gravar(CK, cods);
+  if(!cods[c]){
+    pendente = null; $("#consentimento").hidden = true;
+    msg("Código inválido ou expirado. Peça um novo ao seu responsável.");
+    return;
+  }
+  pendente = c; msg(""); $("#consentimento").hidden = false;
+});
+
+$("#aceitar").addEventListener("click", () => {
+  if(!pendente) return;
+  const cods = limparExpirados(ler(CK, {}));
+  const reg = cods[pendente];
+  if(!reg){ msg("O código expirou. Peça um novo."); $("#consentimento").hidden = true; return; }
+  delete cods[pendente]; gravar(CK, cods);          // código de uso único
+  const v = ler(VK, []);
+  v.push({ nome: reg.nome, desde: new Date().toLocaleDateString("pt-BR") });
+  gravar(VK, v); gravar(EK, reg.nome);
+  if(!DADOS[reg.nome]) DADOS[reg.nome] = vazio();
+  pendente = null; $("#codigoIn").value = ""; $("#consentimento").hidden = true; msg("");
+  renderFilhos(); renderStatusFilho();
+});
+
+$("#recusar").addEventListener("click", () => {
+  pendente = null; $("#consentimento").hidden = true; msg("Vínculo cancelado.");
+});
+
+function renderStatusFilho(){
+  const nome = ler(EK, null);
+  $("#formVinculo").hidden = !!nome;
+  $("#statusFilho").hidden = !nome;
+  if(nome) $("#statusTexto").textContent =
+    `Este aparelho está vinculado como ${nome}. Seu responsável vê suas pesquisas, sites e tempo de uso, mas não bloqueia nada.`;
+}
+
+$("#desvincular").addEventListener("click", () => {
+  const nome = ler(EK, null); if(!nome) return;
+  gravar(VK, ler(VK, []).filter(v => v.nome !== nome));
+  gravar(EK, null);
+  delete DADOS[nome];
+  if(atual === nome) atual = Object.keys(DADOS)[0];
+  renderFilhos(); renderResumo(); renderPainel(); renderStatusFilho();
+});
+
+
+document.querySelectorAll(".modo").forEach(b => b.addEventListener("click", () => {
+  const resp = b.dataset.modo === "resp";
+  $("#visaoResp").hidden = !resp;
+  $("#visaoFilho").hidden = resp;
+  document.querySelectorAll(".modo").forEach(x => x.setAttribute("aria-pressed", x === b));
+  if(!resp) renderStatusFilho();
+}));
+
+renderFilhos(); renderResumo(); renderPainel();
+</script>
+</body>
+</html>
